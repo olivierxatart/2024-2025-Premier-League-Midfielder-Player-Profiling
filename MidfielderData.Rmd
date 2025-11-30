@@ -1,0 +1,181 @@
+---
+title: "Premier League Midfielder Data"
+output: html_document
+date: "2025-05-26"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr)
+library(readr)
+library(readxl)
+
+# Load data
+data <- read_excel("Midfielders_Top_5_Leagues.xlsx")
+
+# Helper function to create a stat column and its percentile
+add_stat_with_percentile <- function(df, varname) {
+  percentile_col <- paste0(varname, "_Percentile")
+  df[[percentile_col]] <- round(percent_rank(df[[varname]]) * 100, 1)
+  return(df)
+}
+
+# Number of players
+n_players <- sum(complete.cases(data))
+
+# Add stats and percentiles
+
+#Standardizing
+data <- add_stat_with_percentile(data, "90s")
+
+#Shooting
+data <- add_stat_with_percentile(data, "npxG")
+data <- add_stat_with_percentile(data, "Share of npxG")
+data <- add_stat_with_percentile(data, "Non Penalty Goals")
+data <- add_stat_with_percentile(data, "Non Penalty Goals/TeamXG")
+data <- add_stat_with_percentile(data, "Shots")
+
+#Passing
+data <- add_stat_with_percentile(data, "Passes Completed")
+data <- add_stat_with_percentile(data, "Share of Passes Completed")
+data <- add_stat_with_percentile(data, "Pass Completion %")
+data <- add_stat_with_percentile(data, "Average Pass Length")
+data <- add_stat_with_percentile(data, "Assists")
+data <- add_stat_with_percentile(data, "xAG")
+data <- add_stat_with_percentile(data, "Progressive Passes/Passes Completed")
+
+#Dribbling
+data <- add_stat_with_percentile(data, "Successful Take-Ons")
+data <- add_stat_with_percentile(data, "Share of Sucessful Take-Ons")
+data <- add_stat_with_percentile(data, "Successful Take-On Percentage")
+data <- add_stat_with_percentile(data, "Progressive Carries")
+
+#Defending (Blocks removed)
+data <- add_stat_with_percentile(data, "Tackles Won")
+data <- add_stat_with_percentile(data, "Share of Tackles Won")
+data <- add_stat_with_percentile(data, "Tackle Completion %")
+data <- add_stat_with_percentile(data, "Aerial Duels Won")
+data <- add_stat_with_percentile(data, "Aerial Duel Win %")
+
+#Positioning (Blocks moved here)
+data <- add_stat_with_percentile(data, "Interceptions")
+data <- add_stat_with_percentile(data, "Blocks")
+data <- add_stat_with_percentile(data, "Progressive Passes Received")
+data <- add_stat_with_percentile(data, "Touches")
+data <- add_stat_with_percentile(data, "Share of Touches")
+
+# Round specific columns to 2 decimals
+cols_to_round <- c("npxG", "Share of npxG", "Non Penalty Goals", 
+                   "Non Penalty Goals/TeamXG", "Shots",
+                   "Passes Completed", "Share of Passes Completed",
+                   "Pass Completion %", "Average Pass Length",
+                   "Assists", "xAG", "Progressive Passes/Passes Completed",
+                   "Successful Take-Ons", "Share of Sucessful Take-Ons",
+                   "Successful Take-On Percentage", "Progressive Carries",
+                   "Tackles Won", "Share of Tackles Won", "Tackle Completion %",
+                   "Aerial Duels Won", "Aerial Duel Win %",
+                   "Interceptions", "Blocks", "Progressive Passes Received", 
+                   "Touches", "Share of Touches")
+
+data[cols_to_round] <- lapply(data[cols_to_round], function(x) round(x, 2))
+
+# Composite variables
+data <- data %>%
+  mutate(
+    ShootingComposite = round(
+      0.25 * npxG_Percentile +
+      0.25 * `Share of npxG_Percentile` +
+      0.10 * `Non Penalty Goals_Percentile`+ 
+      0.10 * `Non Penalty Goals/TeamXG_Percentile` + 
+      0.30 * Shots_Percentile, 2),
+
+    PassingComposite = round(
+      0.10 * `Passes Completed_Percentile` +
+      0.10 * `Share of Passes Completed_Percentile` +
+      0.20 * `Pass Completion %_Percentile` + 
+      0.20 * `Average Pass Length_Percentile` +
+      0.15 * xAG_Percentile +
+      0.05 * Assists_Percentile +
+      0.20 * `Progressive Passes/Passes Completed_Percentile`, 2),
+
+    DribblingComposite = round(
+      0.15 * `Successful Take-Ons_Percentile` +
+      0.15 * `Share of Sucessful Take-Ons_Percentile` +  
+      0.30 * `Successful Take-On Percentage_Percentile` +
+      0.40 * `Progressive Carries_Percentile`, 2),
+
+    DefendingComposite = round(
+      0.15 * `Tackles Won_Percentile` +
+      0.10 * `Share of Tackles Won_Percentile` +
+      0.35 * `Tackle Completion %_Percentile` +
+      0.15 * `Aerial Duels Won_Percentile` +
+      0.25 * `Aerial Duel Win %_Percentile`, 2),
+
+    PositioningComposite = round(
+      0.30 * Interceptions_Percentile +
+      0.20 * Blocks_Percentile +
+      0.20 * `Progressive Passes Received_Percentile` +
+      0.15 * Touches_Percentile +
+      0.15 * `Share of Touches_Percentile`, 2),
+    
+    OverallComposite = round(
+      0.15 * ShootingComposite +
+      0.20 * PassingComposite +
+      0.15 * DribblingComposite +
+      0.25 * DefendingComposite +
+      0.10 * PositioningComposite +
+      0.15 * `90s_Percentile`,  2),
+    
+    # Offensive metric (Shooting, Passing, Dribbling only, with same weights)
+    OffensiveComposite = round(
+      0.10 * ShootingComposite +
+      0.20 * PassingComposite +
+      0.15 * DribblingComposite, 2)
+  )
+
+# Add percentiles for composites + classification
+data <- data %>%
+  mutate(
+    OverallComposite_Percentile = round(percent_rank(OverallComposite) * 100, 1),
+    ShootingComposite_Percentile = round(percent_rank(ShootingComposite) * 100, 1),
+    PassingComposite_Percentile = round(percent_rank(PassingComposite) * 100, 1),
+    DribblingComposite_Percentile = round(percent_rank(DribblingComposite) * 100, 1),
+    DefendingComposite_Percentile = round(percent_rank(DefendingComposite) * 100, 1),
+    PositioningComposite_Percentile = round(percent_rank(PositioningComposite) * 100, 1),
+    OffensiveComposite_Percentile = round(percent_rank(OffensiveComposite) * 100, 1),
+    
+    MidfielderType = case_when(
+      OffensiveComposite_Percentile >= DefendingComposite_Percentile + 25 ~ "Offensive-Minded",
+      DefendingComposite_Percentile >= OffensiveComposite_Percentile + 25 ~ "Defensive-Minded",
+      TRUE ~ "Balanced"
+    )
+  )
+
+# Reorder columns to place composite scores after 'Team'
+composite_cols <- c(
+  "OverallComposite", "OverallComposite_Percentile",
+  "OffensiveComposite", "OffensiveComposite_Percentile", "MidfielderType",
+  "ShootingComposite", "ShootingComposite_Percentile",
+  "PassingComposite", "PassingComposite_Percentile",
+  "DribblingComposite", "DribblingComposite_Percentile",
+  "DefendingComposite", "DefendingComposite_Percentile",
+  "PositioningComposite", "PositioningComposite_Percentile"
+)
+
+data <- data %>%
+  select(`Player Name`, Age, Position, Team, all_of(composite_cols), everything())
+
+# Save to CSV
+write_csv(data, "midfielders_data.csv")
+
+# View the data
+print(data)
+
+
+
+```
+
+
