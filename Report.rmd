@@ -5,27 +5,16 @@ date: "`r Sys.Date()`"
 output: pdf_document
 ---
 
-
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
 library(knitr)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 
-```
-```{css, echo=FALSE}
-h1, h2, h3, h4, h5, h6 {
-  text-decoration: underline;
-  margin-top: 50px;      /* creates big spacing between sections */
-}
-
-a {
-  color: blue;            /* makes links look like links */
-  text-decoration: underline;
-}
 ```
 
 # Premier League 2024/2025 Midfielder Player Profiling Project
 
 # Background
+
 In soccer, it is difficult to gauge how good players are due to there being so many responsibilities that they take on, like tackling, passing, or scoring. In addition, there are 11 positions in which each one calls upon certain responsibilities more or less than another. Before this project, I was really interested in understanding how good midfielders are statistically, despite midfielders having very different roles across teams. I was also interested in seeing how I could account for statistical discrepancies due to the level of a player’s team within a league. My goal was to create a project that provided an objective and accurate view of midfielders despite the complexity to player analysis. I decided to use Premier League midfielder stats from 2024/2025 from Football Reference to create an R shiny project. I chose to get my data from Football Reference since the website has a significant amount of player data(over 100 metrics per player). The project displayed midfielders’ overall numeral ability and their numeral abilities that make up the overall abilities as well as an estimated transfer value.
 
 # Failed API + Excel Data
@@ -37,7 +26,6 @@ As a result, I manually copied all of my player data from Football Reference int
 # Short Data Intake Script
 
 After that, I created a Midfielder Data R Script that took in all the data from my Excel file and added percentiles for each stat. Also, the script created the composite values and the overall composite values for my players.
-
 
 ```{r shooting-table, echo=FALSE}
 ### Shooting Variable
@@ -135,11 +123,13 @@ The leaderboards rank players by a composite value and display players and their
 
 # Scatterplot
 
-The scatterplot allows you to edit the x and y axis by putting in specific or composite stats and you can see how each player performs in those stats. You can click on the midfielder types that you would like to not appear on the scatterplot. You can click the names checkbox above the scatterplot to have all midfielders names appear above their points. You can also click on a player's point, hover over a few lines of information, and go directly to their player profile.
+The scatterplot allows you to edit the x and y axis by putting in specific or composite stats and you can see how each player performs in those stats. You can type the stat names in the dropdown for the x and y axis. You can click on the midfielder types that you would like to not appear on the scatterplot. You can click the names checkbox above the scatterplot to have all midfielders names appear above their points. You can also click on a player's point, hover over a few lines of information, and go directly to their player profile.
+
 
 # Player filter
 
-The player filter allows you to toggle a player’s composite values, team, age, and positional role. Once you click on the filter button, players are organized from highest Overall Composite value to lowest with the same row appearance as the leaderboard. There will also be a scatterplot for the filtered players on the filter results page. You can access a player’s profile by clicking on their row.
+The player filter allows you to toggle a player’s composite values, team, age, and positional role.  You can type the stat names in the dropdown for ability, midfield type, and age for the x and y axis.Once you click on the filter button, players are organized from highest Overall Composite value to lowest with the same row appearance as the leaderboard. There will also be a scatterplot for the filtered players on the filter results page. You can access a player’s profile by clicking on their row.
+
 
 # Player Profile
 
@@ -161,7 +151,6 @@ Bilal El Khannouss seemed like an average player in the 2024/2025 Premier League
 knitr::include_graphics("fbref.png")
 ```
 
-
 However, the football reference profiles do not account for the team which a player plays for. El Khannouss’ Leicester City team scored a measly 33 goals across the 38 game season, illustrating the lack of quality in the attack for the squad that limited his attacking opportunities. Despite this difficulty, he managed to score a tenth of the team’s expected goals and completed a fifth of the team’s successful take-ons, indicating he was heavily relied upon in the offensive third. In the El Khannouss’ radar chart from my project, you can see that in actuality, he was an excellent dribbler, in fact the second best in the league. He was also a decent passer and defender and okay goalscorer. Bibal El Khannouss is an example of a player whose general stats are not reflective of his ability due to his team level. The Overall Composite value accounts for nuances like these that result in inaccurate understandings of a player’s capabilities.
 
 ```{r fbref-radar, echo=FALSE, out.width="80%", fig.align="center"}
@@ -170,19 +159,18 @@ knitr::include_graphics("radar.png")
 
 # Takeaways
 
-From the dataset, there were some interesting trends between factors. 
-The  first of which was that there was a negative correlation between age and dribbling composite. I find this a bit surprising because a player's technical ability gets better as they age due to repetition. A midfielder’s dribbling ability may get worse as they age due to physical decline in speed and agility. Also, after a player has played a higher amount of games, opponents start to notice frequent dribbling moves and organize themselves to prevent those players from completing those dribbles. 
-
+From the dataset, there were some interesting trends between factors. The first of which was that there was a negative correlation between age and dribbling composite. I find this a bit surprising because a player's technical ability gets better as they age due to repetition. A midfielder’s dribbling ability may get worse as they age due to physical decline in speed and agility. Also, after a player has played a higher amount of games, opponents start to notice frequent dribbling moves and organize themselves to prevent those players from completing those dribbles.
 
 ```{r fbref-scatter, echo=FALSE, out.width="80%", fig.align="center"}
 knitr::include_graphics("scatter.png")
 ```
 
-Another takeaway I had was that midfielders on teams at different levels will be better at certain attributes. For example, in the Passing Composite vs Defence Composite scatterplot featuring players from 1st place Liverpool and 20th place Southampton, one can clearly see that Liverpool is better at passing and Southampton is better at defending. A bigger team possesses the ball more and is trying to create goalscoring chances while a smaller team spends more time without the ball trying to prevent goals, resulting in both teams having different profiles of players. 
+Another takeaway I had was that midfielders on teams at different levels will be better at certain attributes. For example, in the Passing Composite vs Defence Composite scatterplot featuring players from 1st place Liverpool and 20th place Southampton, one can clearly see that Liverpool is better at passing and Southampton is better at defending. A bigger team possesses the ball more and is trying to create goalscoring chances while a smaller team spends more time without the ball trying to prevent goals, resulting in both teams having different profiles of players.
 
 ```{r fbref-scatter2, echo=FALSE, out.width="80%", fig.align="center"}
 knitr::include_graphics("scatter2.png")
 ```
+
 # Who the project could be used for
 
 Teams can see what skills players have that they can use in different games based on the composite values. Teams can also use the Overall Composite metric for general player evaluation and transfer decision purposes.
@@ -199,10 +187,8 @@ The project uses data from 109 Premier League players from a single Premier Leag
 
 Link to my project
 
-https://olivierxatart.shinyapps.io/playerprofilingproject/
+<https://olivierxatart.shinyapps.io/playerprofilingproject/>
 
 Link to my data source
 
-https://fbref.com/en/comps/9/2024-2025/2024-2025-Premier-League-Stats
-
-
+<https://fbref.com/en/comps/9/2024-2025/2024-2025-Premier-League-Stats>

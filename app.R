@@ -937,7 +937,6 @@ observeEvent(input$select_all_teams, {
         y = fitted(lm(yval ~ xval, data = df)),
         type = 'scatter',
         mode = 'lines',
-        line = list(color = 'white', dash = 'dash'),
         inherit = FALSE,
         showlegend = FALSE
       )
